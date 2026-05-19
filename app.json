@@ -2,11 +2,6 @@
   "expo": {
     "name": "سند",
     "slug": "snd",
-    "extra": {
-      "eas": {
-        "projectId": "accef6df-d772-4013-b679-e5c56f02fc73"
-      }
-    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -37,6 +32,12 @@
     ],
     "android": {
       "package": "com.saood.sanad"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "25e464e5-1495-4706-b3eb-bea843125949"
+      }
     }
   }
 }
