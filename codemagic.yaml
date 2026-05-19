@@ -1,0 +1,41 @@
+workflows:
+  expo-android:
+    name: Build Sanad Expo APK (Maximum Compression)
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      node: latest
+    triggering:
+      events:
+        - push
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+      - name: Prebuild Expo to generate Android folder
+        script: |
+          npx expo prebuild --platform android
+      - name: Inject Ultra Compression Scripts
+        script: |
+          node -e "
+          const fs = require('fs');
+          const gradlePath = 'android/app/build.gradle';
+          if (fs.existsSync(gradlePath)) {
+            let content = fs.readFileSync(gradlePath, 'utf8');
+            // 1. تفعيل البروجارد لتنظيف الأكواد
+            content = content.replace(/enableProguardInReleaseBuilds\s*=\s*false/g, 'enableProguardInReleaseBuilds = true');
+            // 2. تفعيل فصل المعالجات لتخسيس الحجم لأقصى درجة
+            content = content.replace(/enableSeparateBuildPerCPUArchitecture\s*=\s*false/g, 'enableSeparateBuildPerCPUArchitecture = true');
+            // 3. تفعيل ضغط الموارد وحذف الصور والملفات غير المستخدمة
+            content = content.replace(/shrinkResources\s+false/g, 'shrinkResources true');
+            fs.writeFileSync(gradlePath, content, 'utf8');
+            console.log(' تم حقن سكريبتات الضغط الأقصى بنجاح!');
+          } else {
+            console.error('الملف غير موجود!');
+          }
+          "
+      - name: Build Android App (Release Build)
+        script: |
+          cd android && ./gradlew assembleRelease --no-daemon
+    artifacts:
+      - android/app/build/outputs/apk/release/*.apk
